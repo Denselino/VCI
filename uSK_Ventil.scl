@@ -1,0 +1,184 @@
+﻿FUNCTION_BLOCK "uSK_Ventil"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 3.2
+   VAR_INPUT 
+      I_szName { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : String;
+      I_xSensorAS { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Sensor für Stellung AS
+      I_xSensorGS { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Sensor für Stellung GS
+      I_swTimeout { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : DInt;
+   END_VAR
+
+   VAR_OUTPUT 
+      O_xAusgangAS { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Ventilansteuerung Arbeitsstellung
+      O_xAusgangGS { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Ventilansteuerung Grundstellung
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_stSteuerVentil : "stSteuerVentil";   // Ventil Steuerstruktur 
+      IO_stVisuVentil : "stVisuHandVentil";   // Steuerstruktur Visualisierung 
+   END_VAR
+
+   VAR 
+      xEinrichtAktiv { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Einrichten ist aktiv
+      xAblaufAktiv { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Ablauf ist aktiv
+      xEinrichtSelbshaltung_AS { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Selbsthaltung Einrichten Arbeitsstellung
+      xEinrichtSelbshaltung_GS { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Selbsthaltung Einrichten Grundstellung
+      hLaufzeit_GS {InstructionName := 'TON_TIME'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : TON_TIME;   // Timer Einschaltverzögerung Laufzeit Arbeitsstellung
+      hLaufzeit_AS {InstructionName := 'TON_TIME'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : TON_TIME;   // Timer Einschaltverzögerung Laufzeit Arbeitsstellung
+      xFehlerPaarbelegung { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Fehlermeldung: Beide Sensoren (AS und GS) belegt
+      xFehlerLaufzeit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Fehlermeldung: Laufzeitüberwachung AS
+      xMeldungASVerriegelt { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Meldung: Arbeitsstellung angesteuert aber Bewegung verriegelt
+      xMeldungGSVerriegelt { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Meldung: Grundstellung angesteuert aber Bewegung verriegelt
+   END_VAR
+
+
+BEGIN
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Header
+	    // ==================================================================
+	    // Copyright ERSA GmbH
+	    // 97877 Wertheim - Germany
+	    // ------------------------------------------------------------------
+	    // B E S C H R E I B U N G
+	    // ------------------------------------------------------------------
+	    // Ventil
+	    // ==================================================================
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Ansteuerung aus Ablauf
+	    #xEinrichtAktiv := "DB_BA".stBetriebsart.xEinrichten;
+	    #xAblaufAktiv := "DB_BA".stBetriebsart.xBetriebsfreigabe;
+	    
+	    IF (#xAblaufAktiv) THEN
+	        // Trigger Einricht zurücksetzen -------------------
+	        #IO_stVisuVentil.stVentil.xAS := FALSE;
+	        #IO_stVisuVentil.stVentil.xGS := FALSE;
+	        
+	        // Trigger Ablauf GS -------------------------------
+	        IF #IO_stSteuerVentil.xAuto_GS THEN
+	            #IO_stSteuerVentil.xAuto_AS := FALSE;
+	            #IO_stSteuerVentil.xIST_AS := FALSE;
+	            #IO_stSteuerVentil.xIST_GS := FALSE;
+	            
+	            IF (#I_xSensorGS) THEN
+	                #IO_stSteuerVentil.xAuto_GS := FALSE;
+	                #IO_stSteuerVentil.xIST_GS := TRUE;
+	            END_IF;
+	        ELSIF #IO_stSteuerVentil.xAuto_GS AND #I_xSensorGS THEN
+	            #IO_stSteuerVentil.xAuto_GS := FALSE;
+	            #IO_stSteuerVentil.xIST_GS := TRUE;
+	        END_IF;
+	        
+	        // Trigger Ablauf AS -------------------------------
+	        IF #IO_stSteuerVentil.xAuto_AS THEN
+	            #IO_stSteuerVentil.xAuto_GS := FALSE;
+	            #IO_stSteuerVentil.xIST_AS := FALSE;
+	            #IO_stSteuerVentil.xIST_GS := FALSE;
+	            
+	            IF (#I_xSensorAS) THEN
+	                #IO_stSteuerVentil.xAuto_AS := FALSE;
+	                #IO_stSteuerVentil.xIST_AS := TRUE;
+	            END_IF;
+	        ELSIF #IO_stSteuerVentil.xAuto_AS AND #I_xSensorAS THEN
+	            #IO_stSteuerVentil.xAuto_AS := FALSE;
+	            #IO_stSteuerVentil.xIST_AS := TRUE;
+	        END_IF;
+	        
+	        // Übernahme der Steuerwerte auf Einricht ----------
+	        #xEinrichtSelbshaltung_AS := #IO_stSteuerVentil.xIST_AS;
+	        #xEinrichtSelbshaltung_GS := #IO_stSteuerVentil.xIST_GS;
+	        
+	        // Prügen ob Bewegung verriegelt ist ---------------
+	      //  #xMeldungASVerriegelt := #IO_stSteuerVentil.xAuto_AS AND NOT #IO_stSteuerVentil.xIST_AS;
+	      //#xMeldungGSVerriegelt := #IO_stSteuerVentil.xAuto_GS AND NOT #IO_stSteuerVentil.xIST_GS;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Ansteuerung aus Einrichtbetrieb
+	    //---------------------------------------------------------------------
+	    IF (#xEinrichtAktiv) THEN
+	        
+	        // Trigger Ablauf zurücksetzen ---------------------
+	        #IO_stSteuerVentil.xAuto_AS := FALSE;
+	        #IO_stSteuerVentil.xAuto_GS := FALSE;
+	        
+	        // Trigger Einricht GS -----------------------------
+	        IF #IO_stVisuVentil.stVentil.xGS THEN
+	            
+	            #IO_stVisuVentil.stVentil.xAS := FALSE;
+	            #xEinrichtSelbshaltung_AS := FALSE;
+	            #xEinrichtSelbshaltung_GS := FALSE;
+	            
+	            IF #I_xSensorGS THEN
+	                #xEinrichtSelbshaltung_GS := TRUE;
+	            END_IF;
+	        END_IF;
+	        
+	        // Trigger Einricht AS -----------------------------
+	        IF #IO_stVisuVentil.stVentil.xAS THEN
+	            
+	            #IO_stVisuVentil.stVentil.xGS := FALSE;
+	            #xEinrichtSelbshaltung_AS := FALSE;
+	            #xEinrichtSelbshaltung_GS := FALSE;
+	            
+	            IF #I_xSensorAS THEN
+	                #xEinrichtSelbshaltung_AS := TRUE;
+	            END_IF;
+	        END_IF;
+	        
+	        // Übernahme der Steuerwerte auf Ablauf ------------
+	        #IO_stSteuerVentil.xIST_AS := #xEinrichtSelbshaltung_AS;
+	        #IO_stSteuerVentil.xIST_GS := #xEinrichtSelbshaltung_GS;
+	        
+	        // Prügen ob Bewegung verriegelt ist ---------------
+	       // #xMeldungASVerriegelt := #IO_stVisuVentil.stVentil.xAS AND NOT #xEinrichtSelbshaltung_AS;
+	       // #xMeldungGSVerriegelt := #IO_stVisuVentil.stVentil.xGS AND NOT #xEinrichtSelbshaltung_GS;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION AUSGÄNGE ZUWEISEN
+	    //---------------------------------------------------------------------
+	    #O_xAusgangAS := (#IO_stVisuVentil.stVentil.xAS AND #xEinrichtAktiv);
+	    #O_xAusgangAS := #O_xAusgangAS OR (#xEinrichtSelbshaltung_AS AND #xEinrichtAktiv);
+	    #O_xAusgangAS := #O_xAusgangAS OR (#IO_stSteuerVentil.xAuto_AS AND #xAblaufAktiv);
+	    #O_xAusgangAS := #O_xAusgangAS OR (#IO_stSteuerVentil.xIST_AS AND #xAblaufAktiv);
+	   // #O_xAusgangAS := #O_xAusgangAS AND #I_xSensorAS;
+	    
+	    #O_xAusgangGS := (#IO_stVisuVentil.stVentil.xGS AND #xEinrichtAktiv);
+	    #O_xAusgangGS := #O_xAusgangGS OR (#xEinrichtSelbshaltung_GS AND #xEinrichtAktiv);
+	    #O_xAusgangGS := #O_xAusgangGS OR (#IO_stSteuerVentil.xAuto_GS AND #xAblaufAktiv);
+	    #O_xAusgangGS := #O_xAusgangGS OR (#IO_stSteuerVentil.xIST_GS AND #xAblaufAktiv);
+	    //#O_xAusgangGS := #O_xAusgangGS AND #I_xSensorGS;
+	    
+	    #IO_stVisuVentil.stVentil.xSensor_GS := #I_xSensorGS;
+	    #IO_stVisuVentil.stVentil.xSensor_AS := #I_xSensorAS;
+	    #IO_stVisuVentil.stVentil.xAusgang_GS := #O_xAusgangGS;
+	    #IO_stVisuVentil.stVentil.xAusgang_AS := #O_xAusgangAS;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION LAUFZEITERFASSUNG
+	    
+	    #hLaufzeit_AS(IN := (#O_xAusgangAS AND NOT #I_xSensorAS) AND #xAblaufAktiv,
+	                  PT := (DINT_TO_TIME(#I_swTimeout * 1000)));
+	    
+	    #hLaufzeit_GS(IN := (#O_xAusgangGS AND NOT #I_xSensorGS) AND #xAblaufAktiv,
+	                  PT := (DINT_TO_TIME(#I_swTimeout * 1000)));
+	    
+	    IF (#hLaufzeit_AS.Q OR #hLaufzeit_GS.Q) THEN
+	        IF "DB_BA".xRESET_ERROR THEN
+	            RESET_TIMER(#hLaufzeit_AS);
+	            RESET_TIMER(#hLaufzeit_GS);
+	            #xFehlerLaufzeit := FALSE;
+	        END_IF;
+	    END_IF;
+	
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION FEHLERMELDUNGEN
+	    //---------------------------------------------------------------------
+	    #xFehlerPaarbelegung := #I_xSensorGS AND #I_xSensorAS;
+	    #xFehlerLaufzeit := #hLaufzeit_AS.Q OR #hLaufzeit_GS.Q;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+END_FUNCTION_BLOCK
+
