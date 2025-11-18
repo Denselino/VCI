@@ -1,0 +1,553 @@
+﻿FUNCTION_BLOCK "uSK_Scanner_SRx"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 1.5
+   VAR_INPUT 
+      I_HwID { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : HW_ANY;
+      I_swLaengeNutzdaten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int := 128;
+      I_chEndkennung { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Char := '$03';
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_stSteuerScannerSRX : "stSteuerScan_SRx";
+      IO_stVisuScanner : "stVisuHandScanner";
+   END_VAR
+
+   VAR 
+      stSK { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "stSKMerker";
+      hSKInit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "Flanke";
+      stGenerell { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         xError { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xResultDataAvaliable { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes02 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes03 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes04 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes05 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xBufferOverflow { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xGeneralError { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      END_STRUCT;
+      stBusy { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         xBUSY { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xLesenAktiv { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xLockAktiv { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xModeAktiv { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xErrorAktiv { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes05 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes06 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes07 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      END_STRUCT;
+      stFertig { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         xLesen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xVergleichsdaten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xVergleichsdatenRegistrieren { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xTuning { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xBLOAD { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes05 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes06 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xExternerRequest { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      END_STRUCT;
+      stError { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         xLesefehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xVergleichsdatenfehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xFehlerVergleichsdatenRegistrieren { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xTuningFehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xBLOADFehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes05 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes06 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xFehlerExternerRequest { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      END_STRUCT;
+      stDaten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         wZaehlerLesedatenBereit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+         wZaehlerLesedatenUpdate { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+         wZaehlerTriggerAmMaster { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+         wAnzahlBytesErhalten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+         stDaten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[1..#LAENGENUTZDATEN] of Byte;
+      END_STRUCT;
+      stTrigger { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         xLesen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xVergleichsdatenLesen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xVergleichdatenregistrierung { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xTuning { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xBLOAD { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes05 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes06 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes07 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      END_STRUCT;
+      stQuittierungen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Struct
+         xQuittLesenAbgeschlossen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xQuittVergleichsdatenAbgeschlossen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xQuittVergleichsdatenRegistrierenAbgeschlossen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xQuittTuningAbgeschlossen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xQuittBLOADAbgeschlossen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes05 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xRes06 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+         xQuittExtRequestAbgeschlossen { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      END_STRUCT;
+      dwRetVal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : DWord;
+      swLänge { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;
+      szNutzDaten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : String[128];
+      GETIO_Instance {InstructionName := 'GETIO'; LibVersion := '1.1'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : GETIO;
+      SETIO_Instance {InstructionName := 'SETIO'; LibVersion := '1.2'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : SETIO;
+      swPNIOFehlernummer { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;
+      xErr_PNIOFehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      xErr_Sammelfehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      xErr_ScannerMeldetFehler { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      xErr_FehlerTimeout { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      xErr_FehlerNutzdaten { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      GeoAdrr {InstructionName := 'GEOADDR'; LibVersion := '1.0'; ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : GEOADDR;
+      retVal1 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;
+      retVal2 { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;
+      Hw_ADDR { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..20] of HW_SUBMODULE;
+   END_VAR
+
+   VAR_TEMP 
+      i : UInt;
+      swtmp_i : Int;
+   END_VAR
+
+   VAR CONSTANT 
+      LAENGENUTZDATEN : Int := 128;
+   END_VAR
+
+
+BEGIN
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Header
+	    // ==================================================================
+	    // Copyright ERSA GmbH
+	    // 97877 Wertheim - Germany
+	    // ------------------------------------------------------------------
+	    // B E S C H R E I B U N G
+	    // ------------------------------------------------------------------
+	    // Scanner SRx
+	    // ==================================================================
+	END_REGION
+	//---------------------------------------------------------------------'
+	// Konfigurationen sind in den Bausteinkonstanten zu finden !
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION DATEN Lesen
+	    //---------------------------------------------------------------------,
+	    //                                                                     |
+	    //    D A T E N    E I N L E S E N                                     |
+	    //                                                                     |
+	    //---------------------------------------------------------------------'
+	    #retVal1 := LOG2GEO(GEOADDR :=#GeoAdrr, LADDR := #I_HwID);
+	    
+	    FOR #i := 1 TO #GeoAdrr.SLOT DO
+	        #retVal2 := GEO2LOG(GEOADDR := #GeoAdrr, LADDR => #Hw_ADDR[#i]);
+	    END_FOR;
+	    //__________________________________________
+	    //                                          |
+	    // Handshake and General Error Status Bits  |
+	    // _________________________________________|
+	    #swtmp_i := 1;
+	    #GETIO_Instance(ID := #Hw_ADDR[1],
+	                    STATUS => #dwRetVal,
+	                    LEN => #swLänge,
+	                    INPUTS := #stGenerell);
+	    IF #dwRetVal <> 0 OR (#swLänge <> 1) THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	    //__________________________________________
+	    //                                          |
+	    // BUSY Status Bits                         |
+	    // _________________________________________|
+	    #swtmp_i := #swtmp_i + 1;
+	    #GETIO_Instance(ID := #Hw_ADDR[2],
+	                    STATUS => #dwRetVal,
+	                    LEN => #swLänge,
+	                    INPUTS := #stBusy);
+	    IF #dwRetVal <> 0 OR (#swLänge <> 1) THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	    //__________________________________________
+	    //                                          |
+	    // Completition Status Bits                 |
+	    // _________________________________________|
+	    #swtmp_i := #swtmp_i + 1;
+	    #GETIO_Instance(ID := #Hw_ADDR[3],
+	                    STATUS => #dwRetVal,
+	                    LEN => #swLänge,
+	                    INPUTS := #stFertig);
+	    IF #dwRetVal <> 0 OR (#swLänge <> 1) THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	    //__________________________________________
+	    //                                          |
+	    // Error Status Bits                        |
+	    // _________________________________________|
+	    #swtmp_i := #swtmp_i + 1;
+	    #GETIO_Instance(ID := #Hw_ADDR[4],
+	                    STATUS => #dwRetVal,
+	                    LEN => #swLänge,
+	                    INPUTS := #stError);
+	    IF #dwRetVal <> 0 OR (#swLänge <> 1) THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	    //__________________________________________
+	    //                                          |
+	    // ReadData                                 |
+	    // _________________________________________|
+	    #swtmp_i := #swtmp_i + 1;
+	    #GETIO_Instance(ID := #Hw_ADDR[9],
+	                    STATUS => #dwRetVal,
+	                    LEN => #swLänge,
+	                    INPUTS := #stDaten);
+	    IF #dwRetVal <> 0 OR (#swLänge <> (#I_swLaengeNutzdaten + 8)) THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------   
+	REGION Schritthandling
+	    //---------------------------------------------------------------------,
+	    //                                                                     |
+	    //    B A U S T E I N I N H A L T                                      |
+	    //                                                                     |
+	    //---------------------------------------------------------------------'
+	    //=====================================================================
+	    // Umschalten der gültigen Triggersignale
+	    //=====================================================================
+	    IF "DB_BA".stBetriebsart.xEinrichten THEN
+	        #IO_stSteuerScannerSRX.xStart := FALSE;
+	    ELSE
+	        #IO_stVisuScanner.xStart := FALSE;
+	    END_IF;
+	    
+	    //=====================================================================
+	    // Schrittketten - Reset bei Grundstellungsfahrt
+	    //=====================================================================
+	    #hSKInit(I_xVar := "DB_BA".stBetriebsart.xGrundstellung_Laeuft OR "DB_HMI_BAInfo".stTasten.xTasteAnwahlGrundstellung OR "DB_BA".stBetriebsart.xEinrichten);
+	    IF #hSKInit.O_xFp OR #IO_stVisuScanner.xReset OR (#xErr_Sammelfehler AND "DB_BA".xRESET_ERROR) THEN
+	        
+	        // Reset
+	        #IO_stVisuScanner.xReset := FALSE;
+	        #IO_stVisuScanner.xResetOK := TRUE;
+	        #IO_stSteuerScannerSRX.xResetOK := TRUE;
+	        
+	        // SKs rücksetzen
+	        #stSK.#swSchrittnummer := 0;
+	        
+	        #stError.xVergleichsdatenfehler := false;
+	        #stError.xFehlerVergleichsdatenRegistrieren := false;
+	        #stError.xTuningFehler := false;
+	        #stError.xBLOADFehler := false;
+	        #stError.xFehlerExternerRequest := false;
+	        
+	        // Ausgänge initialisieren
+	        #stTrigger.xLesen := FALSE;
+	        #stQuittierungen.xQuittLesenAbgeschlossen := FALSE;
+	        #stQuittierungen.xQuittExtRequestAbgeschlossen := FALSE;
+	        #stQuittierungen.xQuittVergleichsdatenAbgeschlossen := FALSE;
+	        #stQuittierungen.xQuittVergleichsdatenRegistrierenAbgeschlossen := FALSE;
+	        #stQuittierungen.xQuittBLOADAbgeschlossen := FALSE;
+	        #stQuittierungen.xQuittTuningAbgeschlossen := FALSE;
+	        
+	        // Fehler rücksetzen
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := FALSE;
+	        #swPNIOFehlernummer := 0;
+	        
+	        #stQuittierungen.xQuittLesenAbgeschlossen := #stFertig.xLesen OR #stError.xLesefehler;
+	        #stQuittierungen.xQuittExtRequestAbgeschlossen := #stError.xFehlerExternerRequest;
+	        #stQuittierungen.xQuittVergleichsdatenAbgeschlossen := #stError.xVergleichsdatenfehler;
+	        #stQuittierungen.xQuittVergleichsdatenRegistrierenAbgeschlossen := #stError.xFehlerVergleichsdatenRegistrieren;
+	        #stQuittierungen.xQuittBLOADAbgeschlossen := #stError.xBLOADFehler;
+	        #stQuittierungen.xQuittTuningAbgeschlossen := #stError.xTuningFehler;
+	        
+	        // Strukturen-Reset
+	        #IO_stSteuerScannerSRX.xLesenAbgeschlossen := FALSE;
+	        #IO_stSteuerScannerSRX.xLesenFehler := FALSE;
+	        #IO_stSteuerScannerSRX.xBereit := FALSE;
+	        #IO_stSteuerScannerSRX.xStart := FALSE;
+	        #IO_stSteuerScannerSRX.xBload := FALSE;
+	        
+	        #IO_stVisuScanner.xBereit := FALSE;
+	        #IO_stVisuScanner.xStart := FALSE;
+	    END_IF;
+	    
+	    //=====================================================================
+	    // SKx - Steuerungsinformationen
+	    //=====================================================================
+	    //---------------------------------------------------------------------
+	    // Auswertung Schrittwechsel
+	    //---------------------------------------------------------------------
+	    IF #stSK.#swSchrittnummer <> #stSK.#swLetzteSchrittnummer THEN
+	        RESET_TIMER(#stSK.#hSchrittzeit);
+	    END_IF;
+	    #stSK.#swLetzteSchrittnummer := #stSK.#swSchrittnummer;
+	    //---------------------------------------------------------------------
+	    //Laufzeiterfassung Schrittzeiten
+	    //---------------------------------------------------------------------
+	    #stSK.#hSchrittzeit(IN := TRUE,
+	                        PT := T#24D_20H_31M_23S_647MS);
+	    
+	    //---------------------------------------------------------------------
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Schrittkette Scanner
+	    //=====================================================================
+	    // SK1 - Scannablauf
+	    //=====================================================================
+	    //---------------------------------------------------------------------
+	    // Schrittkette  
+	    //---------------------------------------------------------------------
+	    CASE #stSK.#swSchrittnummer OF
+	            //----------------------------------------------------------------------------------------------------------------------------------  
+	        0:    // SK1 - Scannablauf
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            #IO_stSteuerScannerSRX.xLesenAbgeschlossen := FALSE;
+	            #stQuittierungen.xQuittLesenAbgeschlossen := FALSE;
+	            #stQuittierungen.xQuittExtRequestAbgeschlossen := FALSE;
+	            #stQuittierungen.xQuittVergleichsdatenAbgeschlossen := FALSE;
+	            #stQuittierungen.xQuittVergleichsdatenRegistrierenAbgeschlossen := FALSE;
+	            #stQuittierungen.xQuittBLOADAbgeschlossen := FALSE;
+	            #stQuittierungen.xQuittTuningAbgeschlossen := FALSE;
+	            #IO_stSteuerScannerSRX.xBereit := TRUE;
+	            #IO_stVisuScanner.xBereit := TRUE;
+	            #xErr_FehlerTimeout := FALSE;
+	            //---------------------------------------------------------------------
+	            #stSK.#swSchrittnummer := 1;
+	            
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------  
+	        1:    // SK1 - Trigger auswerten
+	            //----------------------------------------------------------------------------------------------------------------------------------
+	            IF (#IO_stSteuerScannerSRX.xStart = TRUE) OR (#IO_stVisuScanner.xStart = TRUE) THEN
+	                
+	                // Steuerstruktur Rückmeldungen rücksetzen
+	                #IO_stSteuerScannerSRX.xLesenAbgeschlossen := FALSE;
+	                #IO_stSteuerScannerSRX.xLesenFehler := FALSE;
+	                #IO_stSteuerScannerSRX.xBereit := FALSE;
+	                #IO_stSteuerScannerSRX.szNutzDaten := '';
+	                #szNutzDaten := '';
+	                
+	                // Visustruktur Rückmeldungen rücksetzen
+	                #IO_stVisuScanner.xBereit := FALSE;
+	                //---------------------------------------------------------------------
+	                #stSK.#swSchrittnummer := 5;
+	            END_IF;
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------  
+	        5:   // SK1 - Scanner starten                                                                                                   Lesen
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            #stTrigger.xLesen := TRUE;
+	            //---------------------------------------------------------------------
+	            IF (#stBusy.xLesenAktiv = TRUE) THEN
+	                #stSK.#swSchrittnummer := 10;
+	            END_IF;
+	            //---------------------------------------------------------------------
+	            
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------  
+	        10:   // SK1 - Scanner starten                                                                                                   Lesen
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            IF (#stFertig.xLesen = TRUE) THEN // [---- FERTIG -----]
+	                
+	                IF WORD_TO_INT(#stDaten.wAnzahlBytesErhalten) > 0 AND WORD_TO_INT(#stDaten.wAnzahlBytesErhalten) <= #I_swLaengeNutzdaten THEN
+	                    
+	                    IF #stDaten.stDaten[WORD_TO_INT(#stDaten.wAnzahlBytesErhalten)] = CHAR_TO_BYTE(#I_chEndkennung) THEN
+	                        
+	                        FOR #swtmp_i := 1 TO (WORD_TO_INT(#stDaten.wAnzahlBytesErhalten) - 1) DO
+	                            #szNutzDaten := CONCAT_STRING(IN1 := #szNutzDaten, IN2 := BYTE_TO_CHAR(#stDaten.stDaten[#swtmp_i]));
+	                        END_FOR;
+	                        
+	                    ELSE
+	                        
+	                        FOR #swtmp_i := 1 TO WORD_TO_INT(#stDaten.wAnzahlBytesErhalten) DO
+	                            #szNutzDaten := CONCAT_STRING(IN1 := #szNutzDaten, IN2 := BYTE_TO_CHAR(#stDaten.stDaten[#swtmp_i]));
+	                        END_FOR;
+	                        
+	                    END_IF;
+	                ELSE
+	                    #IO_stSteuerScannerSRX.xLesenFehler := TRUE;
+	                    #IO_stSteuerScannerSRX.szNutzDaten := '[DATEN_FEHLER]';
+	                    #stSK.#swSchrittnummer := 15;                       // => 15
+	                END_IF;
+	                
+	                #IO_stVisuScanner.szDatenRoh := #szNutzDaten;
+	                #IO_stSteuerScannerSRX.szNutzDaten := #szNutzDaten;
+	                #stTrigger.xLesen := FALSE;                         // Trigger rücksetzen
+	                #stQuittierungen.xQuittLesenAbgeschlossen := TRUE;  // Quittierung "Lesen Abgeschlossen"
+	                #stSK.#swSchrittnummer := 18;                       // => 18
+	                
+	                
+	            ELSIF (#stSK.#hSchrittzeit.ET > t#10s) THEN // [---- TIMEOUT ----]
+	                #IO_stSteuerScannerSRX.szNutzDaten := '[TIMEOUT_LESEN]';
+	                #IO_stVisuScanner.szDatenRoh := '[TIMEOUT_LESEN]';
+	                #stTrigger.xLesen := FALSE;                         // Trigger rücksetzen
+	                #xErr_FehlerTimeout := TRUE;                        // Fehlermeldung
+	                #stSK.#swSchrittnummer := 15;                       // => 15
+	            END_IF;
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------   
+	        15:   // SK1 - Fehlerbehandlung                                                                                                  Lesen
+	            //----------------------------------------------------------------------------------------------------------------------------------  
+	            IF ("DB_BA".xRESET_ERROR = TRUE) OR (#IO_stSteuerScannerSRX.xStart = FALSE) THEN
+	                
+	                // Signale zum Scanner rücksetzen
+	                #stTrigger.xLesen := FALSE;
+	                #stQuittierungen.xQuittLesenAbgeschlossen := FALSE;
+	                
+	                // Steuerstruktur rücksetzen
+	                #IO_stSteuerScannerSRX.szNutzDaten := '';
+	                #szNutzDaten := '';
+	                #IO_stSteuerScannerSRX.xLesenAbgeschlossen := FALSE;
+	                #IO_stSteuerScannerSRX.xLesenFehler := FALSE;
+	                #IO_stSteuerScannerSRX.xStart := FALSE;
+	                
+	                // Visustruktur rücksetzen
+	                #IO_stVisuScanner.szDatenRoh := '';
+	                #IO_stVisuScanner.xStart := FALSE;
+	                #stSK.#swSchrittnummer := 16;
+	            END_IF;
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------   
+	        16:   // SK1 - Fehlerbehandlung                                                                                                  Lesen
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            IF #stError.xLesefehler THEN
+	                #stQuittierungen.xQuittLesenAbgeschlossen := TRUE;
+	            END_IF;
+	            
+	            //---------------------------------------------------------------------
+	            IF #stSK.#hSchrittzeit.ET >= T#250ms THEN
+	                #stQuittierungen.xQuittLesenAbgeschlossen := FALSE;
+	                #stSK.#swSchrittnummer := 0;
+	            END_IF;
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------   
+	        18:   // SK1 - Datenbearbeitung                                                                                                  Lesen
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            //#IO_stSteuerScannerSRX.szNutzDaten := RIGHT(IN := #szNutzDaten, L := 3);
+	            #IO_stVisuScanner.szDatenBearbeitet := #IO_stSteuerScannerSRX.szNutzDaten;
+	            
+	            #stSK.#swSchrittnummer := 20;
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------   
+	        20:   // SK1 - Abgeschlossen                                                                                                     Lesen
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            IF (#stFertig.xLesen = FALSE) THEN
+	                #stQuittierungen.xQuittLesenAbgeschlossen := FALSE;
+	                #IO_stSteuerScannerSRX.xLesenAbgeschlossen := TRUE;
+	                #stSK.#swSchrittnummer := 25;
+	            END_IF;
+	            
+	            //----------------------------------------------------------------------------------------------------------------------------------   
+	        25:   // SK1 - Abgeschlossen                                                                                                     Lesen
+	            //---------------------------------------------------------------------------------------------------------------------------------- 
+	            IF (#IO_stSteuerScannerSRX.xStart = FALSE) AND (#IO_stVisuScanner.xStart = FALSE) THEN
+	                #IO_stSteuerScannerSRX.xLesenAbgeschlossen := FALSE;
+	                #stSK.#swSchrittnummer := 0;
+	                
+	            ELSIF #stSK.#hSchrittzeit.ET >= t#1s THEN
+	                #IO_stSteuerScannerSRX.xLesenAbgeschlossen := FALSE;
+	                #IO_stSteuerScannerSRX.xStart := FALSE;
+	                #IO_stVisuScanner.xStart := FALSE;
+	                #stSK.#swSchrittnummer := 0;
+	            END_IF;
+	    END_CASE;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION DATEN Schreiben
+	    //---------------------------------------------------------------------,
+	    //                                                                     |
+	    //    D A T E N    S C H R E I B E N                                   |
+	    //                                                                     |
+	    //---------------------------------------------------------------------'
+	    //__________________________________________
+	    //                                          |
+	    // Operation Instruction Control Bits       |
+	    // _________________________________________|
+	    #swtmp_i := 100;
+	    #SETIO_Instance(ID := #Hw_ADDR[14],
+	                    STATUS => #dwRetVal,
+	                    OUTPUTS := #stTrigger);
+	    IF #dwRetVal <> 0 THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	    
+	    //__________________________________________
+	    //                                          |
+	    // Completition Clear Control Bits          |
+	    // _________________________________________|
+	    #swtmp_i := #swtmp_i + 1;
+	    #SETIO_Instance(ID := #Hw_ADDR[15],
+	                    STATUS => #dwRetVal,
+	                    OUTPUTS := #stQuittierungen);
+	    IF #dwRetVal <> 0 THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := TRUE;
+	        #swPNIOFehlernummer := #swtmp_i;
+	        GOTO ENDE;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Fehlerhandling
+	    //---------------------------------------------------------------------,
+	    //                                                                     |
+	    //    S A M M E L F E H L E R                                          |
+	    //                                                                     |
+	    //---------------------------------------------------------------------'
+	    //=====================================================================
+	    // Status- und Fehlermeldungen
+	    //=====================================================================
+	    IF #stGenerell.xError OR #stGenerell.xBufferOverflow OR #stGenerell.xGeneralError OR #stError.xVergleichsdatenfehler OR #stError.xFehlerVergleichsdatenRegistrieren OR #stError.xTuningFehler OR #stError.xBLOADFehler OR #stError.xFehlerExternerRequest THEN
+	        #xErr_ScannerMeldetFehler := TRUE;
+	    ELSE
+	        #xErr_ScannerMeldetFehler := FALSE;
+	    END_IF;
+	    
+	ENDE:
+	    
+	    IF #xErr_PNIOFehler THEN
+	        #IO_stSteuerScannerSRX.xBereit := FALSE;
+	        #IO_stVisuScanner.xBereit := FALSE;
+	    END_IF;
+	    
+	    IF #I_swLaengeNutzdaten <> #LAENGENUTZDATEN THEN
+	        #xErr_FehlerNutzdaten := TRUE;
+	    ELSE
+	        #xErr_FehlerNutzdaten := FALSE;
+	    END_IF;
+	    
+	    IF "DB_BA".xRESET_ERROR THEN
+	        #xErr_ScannerMeldetFehler := FALSE;
+	        #xErr_FehlerTimeout := FALSE;
+	        #xErr_PNIOFehler := FALSE;
+	        #swPNIOFehlernummer := 0;
+	    END_IF;
+	    
+	    // Sammelfehler generieren
+	    IF #xErr_ScannerMeldetFehler OR #xErr_FehlerTimeout OR #xErr_PNIOFehler OR #xErr_FehlerNutzdaten THEN
+	        #xErr_Sammelfehler := TRUE;
+	    ELSE
+	        #xErr_Sammelfehler := FALSE;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+END_FUNCTION_BLOCK
+

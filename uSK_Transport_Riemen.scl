@@ -1,0 +1,300 @@
+﻿FUNCTION_BLOCK "uSK_Transport_Riemen"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      I_szName { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : String[60];
+      I_bSollGeschwindigkeit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : DInt;
+   END_VAR
+
+   VAR_OUTPUT 
+      O_xMotor_Freigabe { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;
+      O_xMotor_Vor { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Umrichter Rechtslauf
+      O_xMotor_Rück { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Bool;   // Umrichter Linkslauf
+      O_slSollwert { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : DInt;   // Umrichter Sollwertvorgabe Geschwindigkeit
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_stSteuerTransport : "stSteuerTransport";   // Schnittstelle Ablauf
+      IO_stVisuTransport : "stVisuHandTransport";   // HMI Schnittstelle
+   END_VAR
+
+   VAR 
+      stSK { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "stSKMerker";
+      hSKInit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "Flanke";   // positive Flanke xIstNotHalt
+      bGeschwindigkeit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : DInt;   // Soll Geschwindigkeitsvorgabe
+      fGeschwindigkeit { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      FB_Rampe { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'; S7_SetPoint := 'False'} : "Rampe";
+      slIstwertRampe { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : DInt;
+   END_VAR
+
+
+BEGIN
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Header
+	    // ==================================================================
+	    // Copyright ERSA GmbH
+	    // 97877 Wertheim - Germany
+	    // ------------------------------------------------------------------
+	    // B E S C H R E I B U N G
+	    // ------------------------------------------------------------------
+	    // Transport Riemenband
+	    // ==================================================================
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION VISU  
+	    //---------------------------------------------------------------------
+	    // HMI
+	    //---------------------------------------------------------------------
+	    //Anzeige Motorzustand auf der HMI
+	    #IO_stVisuTransport.xBandSteht := (NOT #O_xMotor_Rück AND NOT #O_xMotor_Vor);
+	    #IO_stVisuTransport.xAusgangVor := (NOT #O_xMotor_Rück AND #O_xMotor_Vor);
+	    #IO_stVisuTransport.xAusgangRück := (#O_xMotor_Rück AND NOT #O_xMotor_Vor);
+	    
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION INIT
+	    #hSKInit(I_xVar := "DB_BA".stBetriebsart.xGrundstellung_Laeuft OR "DB_HMI_BAInfo".stTasten.xTasteAnwahlGrundstellung OR "DB_BA".stBetriebsart.xEinrichten);
+	    //=====================================================================
+	    // Schrittketten - Reset bei Grundstellungsfahrt
+	    //=====================================================================
+	    IF (#hSKInit.O_xFp) THEN
+	        // SKs rücksetzen
+	        IF "DB_BA".stBetriebsart.xEinrichten THEN
+	            #stSK.#swSchrittnummer := 200;
+	        ELSE
+	            #stSK.#swSchrittnummer := 0;
+	        END_IF;
+	        #O_xMotor_Rück := FALSE;
+	        #O_xMotor_Vor := FALSE;
+	        #O_xMotor_Freigabe := FALSE;
+	        #IO_stVisuTransport.xRück := FALSE;
+	        #IO_stVisuTransport.xVor := FALSE;
+	        #IO_stVisuTransport.xStopp := FALSE;
+	        #IO_stSteuerTransport.xBandSteht := TRUE;
+	        #IO_stSteuerTransport.xRueck := FALSE;
+	        #IO_stSteuerTransport.xVor := FALSE;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Steuerungsinfos
+	    //=====================================================================
+	    // SKx - Steuerungsinformationen
+	    //=====================================================================
+	    //---------------------------------------------------------------------
+	    // Auswertung Schrittwechsel
+	    //---------------------------------------------------------------------
+	    IF #stSK.#swSchrittnummer <> #stSK.#swLetzteSchrittnummer THEN
+	        RESET_TIMER(#stSK.#hSchrittzeit);
+	    END_IF;
+	    #stSK.#swLetzteSchrittnummer := #stSK.#swSchrittnummer;
+	    //---------------------------------------------------------------------
+	    //Laufzeiterfassung Schrittzeiten
+	    //---------------------------------------------------------------------
+	    #stSK.#hSchrittzeit(IN := TRUE,
+	                        PT := T#24D_20H_31M_23S_647MS);
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Schittkette Transport Staurollenketten
+	    //=====================================================================
+	    // Schrittkette 1 WT HubSenkStation elektrisch
+	    //=====================================================================
+	    //----------------------------------------------------------------------------------------------------------------------------------
+	    IF "DB_BA".stStatus.xIstSteuerungEin AND ("DB_BA".stBetriebsart.xAutomatikLaeuft OR "DB_BA".stBetriebsart.xGrundstellung_Laeuft OR "DB_BA".stBetriebsart.xEinrichten) THEN
+	        //----------------------------------------------------------------------------------------------------------------------------------
+	        CASE #stSK.#swSchrittnummer OF
+	                //----------------------------------------------------------------------------------------------------------------------------------  
+	            0:    // SK1 - INIT
+	                //---------------------------------------------------------------------------------------------------------------------------------- 
+	                #O_xMotor_Rück := FALSE;
+	                #O_xMotor_Vor := FALSE;
+	                #IO_stVisuTransport.xRück := FALSE;
+	                #IO_stVisuTransport.xVor := FALSE;
+	                #IO_stVisuTransport.xStopp := FALSE;
+	                #IO_stSteuerTransport.xBandSteht := TRUE;
+	                #IO_stSteuerTransport.xRueck := FALSE;
+	                #IO_stSteuerTransport.xVor := FALSE;
+	                
+	                #stSK.#swSchrittnummer := 100;
+	                //---------------------------------------------------------------------
+	                
+	                
+	                // ####################################################################
+	                
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------  
+	            100:   // SK1 - Grundstellung
+	                //---------------------------------------------------------------------------------------------------------------------------------- 
+	                #bGeschwindigkeit := 0;
+	                #IO_stSteuerTransport.xBandSteht := TRUE;
+	                //---------------------------------------------------------------------
+	                IF (#IO_stSteuerTransport.xRueck = TRUE) THEN
+	                    #bGeschwindigkeit := #I_bSollGeschwindigkeit;
+	                    #IO_stSteuerTransport.xBandSteht := FALSE;
+	                    #stSK.#swSchrittnummer := 120;
+	                    
+	                ELSIF (#IO_stSteuerTransport.xVor = TRUE) THEN
+	                    #bGeschwindigkeit := #I_bSollGeschwindigkeit;
+	                    #IO_stSteuerTransport.xBandSteht := FALSE;
+	                    #stSK.#swSchrittnummer := 150;
+	                END_IF;
+	                //---------------------------------------------------------------------
+	                
+	                
+	                
+	                // ##################################################################################################################################
+	                
+	                
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            120:   // SK1 - SEW Motor Linkslauf Starten
+	                //----------------------------------------------------------------------------------------------------------------------------------  
+	                #O_xMotor_Freigabe := TRUE;
+	                #stSK.#swSchrittnummer := 125;
+	                //---------------------------------------------------------------------
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            125:   // SK1 - SEW Motor Linkslauf Starten
+	                //----------------------------------------------------------------------------------------------------------------------------------  
+	                #bGeschwindigkeit := #I_bSollGeschwindigkeit;
+	                
+	                IF (#IO_stSteuerTransport.xRueck = TRUE) THEN
+	                    #O_xMotor_Rück := TRUE;
+	                    #IO_stSteuerTransport.xLaeuftRück := TRUE;
+	                    
+	                ELSIF (#IO_stSteuerTransport.xRueck = FALSE) THEN
+	                    #stSK.#swSchrittnummer := 130;
+	                END_IF;
+	                //---------------------------------------------------------------------
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            130:   // SK1 - SEW Motor Linkslauf Stoppen
+	                //---------------------------------------------------------------------------------------------------------------------------------- 
+	                #O_xMotor_Rück := false;
+	                #O_xMotor_Freigabe := FALSE;
+	                #IO_stSteuerTransport.xRueck := FALSE;
+	                #IO_stSteuerTransport.xLaeuftRück := FALSE;
+	                #stSK.#swSchrittnummer := 100;
+	                //---------------------------------------------------------------------
+	                
+	                
+	                
+	                // ##################################################################################################################################
+	                
+	                
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            150:   // SK1 - SEW Motor Rechtslauf
+	                //----------------------------------------------------------------------------------------------------------------------------------  
+	                #O_xMotor_Freigabe := TRUE;
+	                #stSK.#swSchrittnummer := 155;
+	                //---------------------------------------------------------------------
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            155:   // SK1 - SEW Motor Rechtslauf
+	                //---------------------------------------------------------------------------------------------------------------------------------- 
+	                #bGeschwindigkeit := #I_bSollGeschwindigkeit;
+	                
+	                IF (#IO_stSteuerTransport.xVor = TRUE) THEN
+	                    #O_xMotor_Vor := TRUE;
+	                    #IO_stSteuerTransport.xLaeuftVor := TRUE;
+	                    
+	                ELSIF (#IO_stSteuerTransport.xVor = FALSE) THEN
+	                    #stSK.#swSchrittnummer := 160;
+	                END_IF;
+	                //---------------------------------------------------------------------
+	                
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            160:   // SK1 - SEW Motor Rechtslauf Stopp
+	                //----------------------------------------------------------------------------------------------------------------------------------  
+	                #O_xMotor_Vor := false;
+	                #O_xMotor_Freigabe := FALSE;
+	                #IO_stSteuerTransport.xVor := FALSE;
+	                #IO_stSteuerTransport.xLaeuftVor := FALSE;
+	                #stSK.#swSchrittnummer := 100;
+	                //---------------------------------------------------------------------
+	                
+	                
+	                
+	                // ##################################################################################################################################
+	                
+	                
+	                
+	                // Einrichten
+	                //----------------------------------------------------------------------------------------------------------------------------------   
+	            200:  // SK1 - SEW Motor Linkslauf / Rechtslauf / Stopp / Einrichten
+	                //---------------------------------------------------------------------------------------------------------------------------------- 
+	                #bGeschwindigkeit := #I_bSollGeschwindigkeit;
+	                #O_xMotor_Freigabe := TRUE;
+	                //---------------------------------------------------------------------
+	                //Motor Links nur Tipbetrieb
+	                IF (#IO_stVisuTransport.xRück = TRUE) THEN
+	                    #O_xMotor_Rück := TRUE;
+	                ELSE
+	                    #IO_stVisuTransport.xRück := FALSE;
+	                    #O_xMotor_Rück := FALSE;
+	                END_IF;
+	                
+	                //Motor Rechts nur Tipbetrieb
+	                IF (#IO_stVisuTransport.xVor = TRUE) THEN
+	                    #O_xMotor_Vor := TRUE;
+	                ELSE
+	                    #IO_stVisuTransport.xVor := FALSE;
+	                    #O_xMotor_Vor := FALSE;
+	                END_IF;
+	                
+	                //Motor Stopp
+	                IF (#IO_stVisuTransport.xStopp = TRUE) THEN
+	                    #IO_stVisuTransport.xStopp := FALSE;
+	                    #IO_stVisuTransport.xVor := FALSE;
+	                    #IO_stVisuTransport.xRück := FALSE;
+	                    #O_xMotor_Rück := FALSE;
+	                    #O_xMotor_Vor := FALSE;
+	                END_IF;
+	                
+	                //---------------------------------------------------------------------
+	                // WEITERSCHALTBEDINGUNG
+	                IF NOT "DB_BA".stBetriebsart.xEinrichten THEN
+	                    #bGeschwindigkeit := 0;
+	                    
+	                    #O_xMotor_Rück := FALSE;
+	                    #O_xMotor_Vor := FALSE;
+	                    #O_xMotor_Freigabe := FALSE;
+	                    
+	                    #IO_stVisuTransport.xRück := FALSE;
+	                    #IO_stVisuTransport.xVor := FALSE;
+	                    #IO_stVisuTransport.xStopp := FALSE;
+	                    
+	                    #stSK.#swSchrittnummer := 0;
+	                END_IF;
+	                
+	                
+	                //---------------------------------------------------------------------
+	        END_CASE;
+	    ELSE
+	        #O_xMotor_Rück := FALSE;
+	        #O_xMotor_Vor := FALSE;
+	        #O_xMotor_Freigabe := FALSE;
+	        #IO_stVisuTransport.xRück := FALSE;
+	        #IO_stVisuTransport.xVor := FALSE;
+	        #IO_stVisuTransport.xStopp := FALSE;
+	        #IO_stSteuerTransport.xBandSteht := TRUE;
+	        #IO_stSteuerTransport.xRueck := FALSE;
+	        #IO_stSteuerTransport.xVor := FALSE;
+	        #stSK.#swSchrittnummer := 0;
+	    END_IF;
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+	REGION Geschwindigkeit Transportband
+	    //Motor Sollwertvorgabe Geschwindigkeit
+	    #fGeschwindigkeit := 32767 / 100;
+	    
+	    #FB_Rampe(slSollwert := #bGeschwindigkeit,
+	              slSteigung := 5,
+	              xTaktmerker := "Takt_100ms",
+	              slIstwert => #slIstwertRampe);
+	    
+	    #O_slSollwert := ROUND(#fGeschwindigkeit * #slIstwertRampe);
+	END_REGION
+	//----------------------------------------------------------------------------------------------------------------------------------
+END_FUNCTION_BLOCK
+
