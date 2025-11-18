@@ -1,0 +1,562 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Engineering version="V18" />
+  <SW.Blocks.FB ID="0">
+    <AttributeList>
+      <Interface><Sections xmlns="http://www.siemens.com/automation/Openness/SW/Interface/v5">
+  <Section Name="Input" />
+  <Section Name="Output" />
+  <Section Name="InOut" />
+  <Section Name="Static" />
+  <Section Name="Temp">
+    <Member Name="MIdx" Datatype="Int" />
+  </Section>
+  <Section Name="Constant" />
+</Sections></Interface>
+      <MemoryLayout>Standard</MemoryLayout>
+      <Name>Hauptablauf</Name>
+      <Namespace />
+      <Number>1000</Number>
+      <ProgrammingLanguage>LAD</ProgrammingLanguage>
+      <SetENOAutomatically>false</SetENOAutomatically>
+    </AttributeList>
+    <ObjectList>
+      <MultilingualText ID="1" CompositionName="Comment">
+        <ObjectList>
+          <MultilingualTextItem ID="2" CompositionName="Items">
+            <AttributeList>
+              <Culture>de-DE</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+          <MultilingualTextItem ID="3" CompositionName="Items">
+            <AttributeList>
+              <Culture>en-GB</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+        </ObjectList>
+      </MultilingualText>
+      <SW.Blocks.CompileUnit ID="4" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><StructuredText xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/StructuredText/v3">
+  <Access Scope="GlobalVariable" UId="21">
+    <Symbol UId="22">
+      <Component Name="DB_BA" UId="23">
+        <BooleanAttribute Name="HasQuotes" UId="24">true</BooleanAttribute>
+      </Component>
+      <Token Text="." UId="25" />
+      <Component Name="bSKZähler" UId="26" />
+    </Symbol>
+  </Access>
+  <Blank UId="27" />
+  <Token Text=":=" UId="28" />
+  <Blank UId="29" />
+  <Access Scope="LiteralConstant" UId="30">
+    <Constant UId="31">
+      <ConstantValue UId="33">0</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="34" />
+</StructuredText></NetworkSource>
+          <ProgrammingLanguage>SCL</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="5" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="6" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+              <MultilingualTextItem ID="7" CompositionName="Items">
+                <AttributeList>
+                  <Culture>en-GB</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="8" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="9" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+              <MultilingualTextItem ID="A" CompositionName="Items">
+                <AttributeList>
+                  <Culture>en-GB</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <SW.Blocks.CompileUnit ID="B" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><FlgNet xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/FlgNet/v4">
+  <Parts>
+    <Call UId="21">
+      <CallInfo Name="Call_PN_IOLink_Master" BlockType="FC" />
+    </Call>
+  </Parts>
+  <Wires>
+    <Wire UId="22">
+      <Powerrail />
+      <NameCon UId="21" Name="en" />
+    </Wire>
+  </Wires>
+</FlgNet></NetworkSource>
+          <ProgrammingLanguage>LAD</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="C" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="D" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+              <MultilingualTextItem ID="E" CompositionName="Items">
+                <AttributeList>
+                  <Culture>en-GB</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="F" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="10" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+              <MultilingualTextItem ID="11" CompositionName="Items">
+                <AttributeList>
+                  <Culture>en-GB</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <SW.Blocks.CompileUnit ID="12" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><FlgNet xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/FlgNet/v4">
+  <Parts>
+    <Access Scope="GlobalConstant" UId="21">
+      <Constant Name="cAnzahlMS" />
+    </Access>
+    <Access Scope="LiteralConstant" UId="22">
+      <Constant>
+        <ConstantType>Int</ConstantType>
+        <ConstantValue>0</ConstantValue>
+      </Constant>
+    </Access>
+    <Access Scope="LiteralConstant" UId="23">
+      <Constant>
+        <ConstantType>Int</ConstantType>
+        <ConstantValue>1</ConstantValue>
+      </Constant>
+    </Access>
+    <Access Scope="LocalVariable" UId="24">
+      <Symbol>
+        <Component Name="MIdx" />
+      </Symbol>
+    </Access>
+    <Access Scope="LocalVariable" UId="25">
+      <Symbol>
+        <Component Name="MIdx" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="26">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="WT_vor_Stopper1" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="27">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="WT_nach_Stopper1" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="28">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="WT_vor_Stopper2" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="29">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="WT_nach_Stopper2" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="30">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="Stausensor" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="31">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="Stopper1_eingefahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="32">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="Stopper1_ausgefahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="33">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="Stopper2_eingefahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="34">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_In" />
+        <Component Name="Stopper2_ausgefahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="35">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_Out" />
+        <Component Name="Stopper1_einfahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="36">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_Out" />
+        <Component Name="Stopper1_ausfahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="37">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_Out" />
+        <Component Name="Stopper2_einfahren" />
+      </Symbol>
+    </Access>
+    <Access Scope="GlobalVariable" UId="38">
+      <Symbol>
+        <Component Name="DB_HW_IOs" />
+        <Component Name="stMS" AccessModifier="Array">
+          <Access Scope="LocalVariable">
+            <Symbol>
+              <Component Name="MIdx" />
+            </Symbol>
+          </Access>
+        </Component>
+        <Component Name="HW_Out" />
+        <Component Name="Stopper2_ausfahren" />
+      </Symbol>
+    </Access>
+    <Part Name="Gt" UId="39">
+      <TemplateValue Name="SrcType" Type="Type">Int</TemplateValue>
+    </Part>
+    <Part Name="Move" UId="40" DisabledENO="true">
+      <TemplateValue Name="Card" Type="Cardinality">1</TemplateValue>
+    </Part>
+    <Call UId="41">
+      <CallInfo Name="Unit_MS" BlockType="FB">
+        <Instance Scope="GlobalVariable" UId="42">
+          <Component Name="DB_Unit_MS1" />
+        </Instance>
+        <Parameter Name="I_bMidx" Section="Input" Type="USInt" />
+        <Parameter Name="I_xAnfrageVorgänger" Section="Input" Type="Bool" />
+        <Parameter Name="I_xFreigabeNachfolger" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensor_WTvST1" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensor_WTnST1" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensor_WTvST2" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensor_WTnST2" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensor_Stau" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensorAS_ST1" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensorGS_ST1" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensorAS_ST2" Section="Input" Type="Bool" />
+        <Parameter Name="I_xSensorGS_ST2" Section="Input" Type="Bool" />
+        <Parameter Name="I_HwID_LC" Section="Input" Type="HW_ANY" />
+        <Parameter Name="I_HwID_Scan" Section="Input" Type="HW_ANY" />
+        <Parameter Name="O_xFreigabeVorgänger" Section="Output" Type="Bool" />
+        <Parameter Name="O_xAnfrageNachfolger" Section="Output" Type="Bool" />
+        <Parameter Name="O_xAusgangAS_ST1" Section="Output" Type="Bool" />
+        <Parameter Name="O_xAusgangGS_ST1" Section="Output" Type="Bool" />
+        <Parameter Name="O_xAusgangAS_ST2" Section="Output" Type="Bool" />
+        <Parameter Name="O_xAusgangGS_ST2" Section="Output" Type="Bool" />
+      </CallInfo>
+    </Call>
+  </Parts>
+  <Wires>
+    <Wire UId="49">
+      <Powerrail />
+      <NameCon UId="39" Name="pre" />
+    </Wire>
+    <Wire UId="50">
+      <IdentCon UId="21" />
+      <NameCon UId="39" Name="in1" />
+    </Wire>
+    <Wire UId="51">
+      <IdentCon UId="22" />
+      <NameCon UId="39" Name="in2" />
+    </Wire>
+    <Wire UId="52">
+      <NameCon UId="39" Name="out" />
+      <NameCon UId="40" Name="en" />
+    </Wire>
+    <Wire UId="53">
+      <IdentCon UId="23" />
+      <NameCon UId="40" Name="in" />
+    </Wire>
+    <Wire UId="54">
+      <NameCon UId="40" Name="eno" />
+      <NameCon UId="41" Name="en" />
+    </Wire>
+    <Wire UId="55">
+      <NameCon UId="40" Name="out1" />
+      <IdentCon UId="24" />
+    </Wire>
+    <Wire UId="56">
+      <IdentCon UId="25" />
+      <NameCon UId="41" Name="I_bMidx" />
+    </Wire>
+    <Wire UId="57">
+      <OpenCon UId="43" />
+      <NameCon UId="41" Name="I_xAnfrageVorgänger" />
+    </Wire>
+    <Wire UId="58">
+      <OpenCon UId="44" />
+      <NameCon UId="41" Name="I_xFreigabeNachfolger" />
+    </Wire>
+    <Wire UId="59">
+      <IdentCon UId="26" />
+      <NameCon UId="41" Name="I_xSensor_WTvST1" />
+    </Wire>
+    <Wire UId="60">
+      <IdentCon UId="27" />
+      <NameCon UId="41" Name="I_xSensor_WTnST1" />
+    </Wire>
+    <Wire UId="61">
+      <IdentCon UId="28" />
+      <NameCon UId="41" Name="I_xSensor_WTvST2" />
+    </Wire>
+    <Wire UId="62">
+      <IdentCon UId="29" />
+      <NameCon UId="41" Name="I_xSensor_WTnST2" />
+    </Wire>
+    <Wire UId="63">
+      <IdentCon UId="30" />
+      <NameCon UId="41" Name="I_xSensor_Stau" />
+    </Wire>
+    <Wire UId="64">
+      <IdentCon UId="31" />
+      <NameCon UId="41" Name="I_xSensorAS_ST1" />
+    </Wire>
+    <Wire UId="65">
+      <IdentCon UId="32" />
+      <NameCon UId="41" Name="I_xSensorGS_ST1" />
+    </Wire>
+    <Wire UId="66">
+      <IdentCon UId="33" />
+      <NameCon UId="41" Name="I_xSensorAS_ST2" />
+    </Wire>
+    <Wire UId="67">
+      <IdentCon UId="34" />
+      <NameCon UId="41" Name="I_xSensorGS_ST2" />
+    </Wire>
+    <Wire UId="68">
+      <OpenCon UId="45" />
+      <NameCon UId="41" Name="I_HwID_LC" />
+    </Wire>
+    <Wire UId="69">
+      <OpenCon UId="46" />
+      <NameCon UId="41" Name="I_HwID_Scan" />
+    </Wire>
+    <Wire UId="70">
+      <NameCon UId="41" Name="O_xFreigabeVorgänger" />
+      <OpenCon UId="47" />
+    </Wire>
+    <Wire UId="71">
+      <NameCon UId="41" Name="O_xAnfrageNachfolger" />
+      <OpenCon UId="48" />
+    </Wire>
+    <Wire UId="72">
+      <NameCon UId="41" Name="O_xAusgangAS_ST1" />
+      <IdentCon UId="35" />
+    </Wire>
+    <Wire UId="73">
+      <NameCon UId="41" Name="O_xAusgangGS_ST1" />
+      <IdentCon UId="36" />
+    </Wire>
+    <Wire UId="74">
+      <NameCon UId="41" Name="O_xAusgangAS_ST2" />
+      <IdentCon UId="37" />
+    </Wire>
+    <Wire UId="75">
+      <NameCon UId="41" Name="O_xAusgangGS_ST2" />
+      <IdentCon UId="38" />
+    </Wire>
+  </Wires>
+</FlgNet></NetworkSource>
+          <ProgrammingLanguage>LAD</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="13" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="14" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+              <MultilingualTextItem ID="15" CompositionName="Items">
+                <AttributeList>
+                  <Culture>en-GB</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="16" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="17" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text>+MS Aufruf</Text>
+                </AttributeList>
+              </MultilingualTextItem>
+              <MultilingualTextItem ID="18" CompositionName="Items">
+                <AttributeList>
+                  <Culture>en-GB</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <MultilingualText ID="19" CompositionName="Title">
+        <ObjectList>
+          <MultilingualTextItem ID="1A" CompositionName="Items">
+            <AttributeList>
+              <Culture>de-DE</Culture>
+              <Text>Hauptablauf</Text>
+            </AttributeList>
+          </MultilingualTextItem>
+          <MultilingualTextItem ID="1B" CompositionName="Items">
+            <AttributeList>
+              <Culture>en-GB</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+        </ObjectList>
+      </MultilingualText>
+    </ObjectList>
+  </SW.Blocks.FB>
+</Document>
