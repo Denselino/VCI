@@ -15,6 +15,7 @@ VERSION : 3.2
 
    VAR_IN_OUT 
       IO_stSteuerVentil : "stSteuerVentil";   // Ventil Steuerstruktur 
+	  IO_stSteuerVentil2 : "stSteuerVentil";   // Ventil 2  Steuerstruktur 
       IO_stVisuVentil : "stVisuHandVentil";   // Steuerstruktur Visualisierung 
    END_VAR
 
