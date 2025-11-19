@@ -11,7 +11,11 @@
   <Section Name="Temp">
     <Member Name="MIdx" Datatype="Int" />
   </Section>
-  <Section Name="Constant" />
+  <Section Name="Constant">
+    <Member Name="TEst Git" Datatype="Int">
+      <StartValue>1</StartValue>
+    </Member>
+  </Section>
 </Sections></Interface>
       <MemoryLayout>Standard</MemoryLayout>
       <Name>Hauptablauf</Name>
