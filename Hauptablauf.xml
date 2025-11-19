@@ -371,7 +371,6 @@
           <Component Name="DB_Unit_MS1" />
         </Instance>
         <Parameter Name="I_bMidx" Section="Input" Type="USInt" />
-         <Parameter Name="I_bMidx22" Section="Input" Type="USInt" />
         <Parameter Name="I_xAnfrageVorgänger" Section="Input" Type="Bool" />
         <Parameter Name="I_xFreigabeNachfolger" Section="Input" Type="Bool" />
         <Parameter Name="I_xSensor_WTvST1" Section="Input" Type="Bool" />
