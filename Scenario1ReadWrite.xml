@@ -60,6 +60,7 @@
         <BooleanAttribute Name="ExternalAccessible" SystemDefined="true">false</BooleanAttribute>
         <BooleanAttribute Name="ExternalVisible" SystemDefined="true">false</BooleanAttribute>
         <BooleanAttribute Name="ExternalWritable" SystemDefined="true">false</BooleanAttribute>
+         <BooleanAttribute Name="ExternalWritable11122XX" SystemDefined="true">false</BooleanAttribute>
       </AttributeList>
     </Member>
     <Member Name="instCurrMonitorRelay" Datatype="&quot;LIOLink_3RR24&quot;">
